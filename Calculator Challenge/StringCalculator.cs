@@ -14,13 +14,29 @@ public class StringCalculator : IStringCalculator
     private readonly List<string> _baseDelimiters = new() { ",", "\n" };
 
     /// <summary>
-    /// Step 0: si es vacío => 0 (estado mínimo para primer commit)
+    /// Step 1: Soporte para coma como delimitador, máximo 2 números.
+    /// Entradas inválidas o faltantes se tratan como 0.
     /// </summary>
     public int Add(string input)
     {
         if (string.IsNullOrEmpty(input)) return 0;
-        // Estado mínimo: para cualquier otra cosa, devolver 0 (se implementa en siguientes pasos)
-        return 0;
+
+        // Dividir por coma
+        var parts = input.Split(',');
+
+        // Procesar máximo los primeros 2 números
+        int sum = 0;
+        for (int i = 0; i < parts.Length && i < 2; i++)
+        {
+            var part = parts[i].Trim();
+            if (int.TryParse(part, out var num))
+            {
+                sum += num;
+            }
+            // Si no es número válido, se trata como 0 (suma no cambia)
+        }
+
+        return sum;
     }
 
     /// <summary>

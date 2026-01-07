@@ -1,0 +1,20 @@
+# Build artifacts
+bin/
+obj/
+
+# VS / tooling
+.vs/
+*.user
+*.csproj.user
+*.suo
+
+# Test results
+TestResults/
+
+# Dotnet tools
+/.store/
+/.tools/
+/.packages/
+
+# Others
+*.log

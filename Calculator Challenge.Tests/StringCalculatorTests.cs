@@ -112,4 +112,29 @@ public class StringCalculatorTests
     }
 
     #endregion
+
+    #region Step 3 - Newline delimiter
+
+    [Fact]
+    public void Add_NumbersWithNewlineDelimiter_ReturnsSum()
+    {
+        var result = _calculator.Add("1\n2,3");
+        Assert.Equal(6, result);
+    }
+
+    [Fact]
+    public void Add_OnlyNewlineDelimiters_ReturnsSum()
+    {
+        var result = _calculator.Add("10\n20\n30");
+        Assert.Equal(60, result);
+    }
+
+    [Fact]
+    public void Add_MixedNewlineAndComma_ReturnsSum()
+    {
+        var result = _calculator.Add("5\n10,15\n20");
+        Assert.Equal(50, result);
+    }
+
+    #endregion
 }

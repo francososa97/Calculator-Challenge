@@ -14,14 +14,15 @@ public class StringCalculator : IStringCalculator
     private readonly List<string> _baseDelimiters = new() { ",", "\n" };
 
     /// <summary>
-    /// Step 2: Soporte para coma, sin límite de cantidad de números.
+    /// Step 3: Soporte para coma y salto de línea como delimitadores.
     /// Entradas inválidas o faltantes se tratan como 0.
     /// </summary>
     public int Add(string input)
     {
         if (string.IsNullOrEmpty(input)) return 0;
 
-        var parts = input.Split(',');
+        // Usar coma y \n como delimitadores
+        var parts = input.Split(new[] { ',', '\n' }, StringSplitOptions.None);
         int sum = 0;
 
         foreach (var part in parts)

@@ -218,5 +218,31 @@ public class StringCalculatorTests
     }
 
     #endregion
+
+    #region Step 8 - Multiple delimiters of any length
+
+    [Fact]
+    public void Add_MultipleDelimiters_VariousLengths_ReturnsSum()
+    {
+        var result = _calculator.Add("//[*][!!][r9r]\n11r9r22*hh*33!!44");
+        Assert.Equal(110, result); // 11 + 22 + 0 + 33 + 44
+    }
+
+    [Fact]
+    public void Add_MultipleDelimiters_WithNegatives_Disallowed_Throws()
+    {
+        var ex = Assert.Throws<ArgumentException>(() => _calculator.Add("//[**][;]\n1**-2;3**-5"));
+        Assert.Contains("-2", ex.Message);
+        Assert.Contains("-5", ex.Message);
+    }
+
+    [Fact]
+    public void Add_MultipleDelimiters_RespectsGreaterThan1000Rule()
+    {
+        var result = _calculator.Add("//[###][--]\n1001###2--1000");
+        Assert.Equal(1002, result); // 0 + 2 + 1000
+    }
+
+    #endregion
 }
 

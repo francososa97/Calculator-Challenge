@@ -14,14 +14,13 @@ public class StringCalculator : IStringCalculator
     private readonly List<string> _baseDelimiters = new() { ",", "\n" };
 
     /// <summary>
-    /// Step 7: Soporte para delimitador custom de múltiples caracteres: //[delim]\n
-    /// Ejemplo: //[***]\n11***22***33 => 66
+    /// Step 8: Soporte para múltiples delimitadores custom de cualquier longitud: //[d1][d2][d3]...\n
+    /// Ejemplo: //[*][!!]\n11*22!!33 => 66
     /// </summary>
     public int Add(string input)
     {
         if (string.IsNullOrEmpty(input)) return 0;
 
-        // Detectar delimitador custom //x\n o //[delim]\n
         char[] delimiters = { ',', '\n' };
         
         if (input.StartsWith("//"))
@@ -31,13 +30,36 @@ public class StringCalculator : IStringCalculator
             {
                 string delimDef = input.Substring(2, newlinePos - 2);
                 
-                // Caso: //[delim]\n (multi-char)
-                if (delimDef.StartsWith("[") && delimDef.EndsWith("]"))
+                // Caso: //[delim1][delim2]...\n (múltiples delimitadores)
+                if (delimDef.StartsWith("["))
                 {
-                    string customDelim = delimDef.Substring(1, delimDef.Length - 2);
-                    delimiters = new[] { customDelim[0] }; // Placeholder; procesaremos como string
-                    input = input.Substring(newlinePos + 1);
-                    return AddWithDelimiterString(input, customDelim);
+                    var customDelims = new List<string>();
+                    int pos = 0;
+                    
+                    while (pos < delimDef.Length)
+                    {
+                        if (delimDef[pos] == '[')
+                        {
+                            int closePos = delimDef.IndexOf(']', pos);
+                            if (closePos > pos)
+                            {
+                                string delim = delimDef.Substring(pos + 1, closePos - pos - 1);
+                                if (!string.IsNullOrEmpty(delim))
+                                    customDelims.Add(delim);
+                                pos = closePos + 1;
+                            }
+                            else
+                                break;
+                        }
+                        else
+                            pos++;
+                    }
+                    
+                    if (customDelims.Count > 0)
+                    {
+                        input = input.Substring(newlinePos + 1);
+                        return AddWithMultipleDelimiters(input, customDelims);
+                    }
                 }
                 // Caso: //x\n (single-char)
                 else if (delimDef.Length == 1)
@@ -49,6 +71,29 @@ public class StringCalculator : IStringCalculator
         }
 
         var parts = input.Split(delimiters, StringSplitOptions.None);
+        return ProcessParts(parts);
+    }
+
+    /// <summary>
+    /// Procesa números cuando hay múltiples delimitadores (strings).
+    /// </summary>
+    private int AddWithMultipleDelimiters(string input, List<string> delimiters)
+    {
+        if (string.IsNullOrEmpty(input)) return 0;
+
+        // Ordenar delimitadores de más largo a más corto para evitar conflictos
+        var sortedDelims = delimiters.OrderByDescending(d => d.Length).ToList();
+        
+        // Normalizamos: reemplazamos cada delimitador con un separador único temporal
+        string temp = input;
+        string separator = "\x00"; // Carácter separador temporal
+        
+        foreach (var delim in sortedDelims)
+        {
+            temp = temp.Replace(delim, separator);
+        }
+
+        var parts = temp.Split(new[] { separator[0] }, StringSplitOptions.None);
         return ProcessParts(parts);
     }
 

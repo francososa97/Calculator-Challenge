@@ -14,14 +14,14 @@ public class StringCalculator : IStringCalculator
     private readonly List<string> _baseDelimiters = new() { ",", "\n" };
 
     /// <summary>
-    /// Step 6: Soporte para delimitador custom de un carácter: //x\n
-    /// Ejemplo: //#\n2#5 => 7
+    /// Step 7: Soporte para delimitador custom de múltiples caracteres: //[delim]\n
+    /// Ejemplo: //[***]\n11***22***33 => 66
     /// </summary>
     public int Add(string input)
     {
         if (string.IsNullOrEmpty(input)) return 0;
 
-        // Detectar delimitador custom //x\n
+        // Detectar delimitador custom //x\n o //[delim]\n
         char[] delimiters = { ',', '\n' };
         
         if (input.StartsWith("//"))
@@ -29,18 +29,45 @@ public class StringCalculator : IStringCalculator
             int newlinePos = input.IndexOf('\n');
             if (newlinePos > 2)
             {
-                // El delimitador es un carácter entre // y \n
-                string customDelim = input.Substring(2, newlinePos - 2);
-                // Si es un carácter, usarlo como delimitador
-                if (customDelim.Length == 1)
+                string delimDef = input.Substring(2, newlinePos - 2);
+                
+                // Caso: //[delim]\n (multi-char)
+                if (delimDef.StartsWith("[") && delimDef.EndsWith("]"))
                 {
-                    delimiters = new[] { customDelim[0] };
+                    string customDelim = delimDef.Substring(1, delimDef.Length - 2);
+                    delimiters = new[] { customDelim[0] }; // Placeholder; procesaremos como string
+                    input = input.Substring(newlinePos + 1);
+                    return AddWithDelimiterString(input, customDelim);
+                }
+                // Caso: //x\n (single-char)
+                else if (delimDef.Length == 1)
+                {
+                    delimiters = new[] { delimDef[0] };
                     input = input.Substring(newlinePos + 1);
                 }
             }
         }
 
         var parts = input.Split(delimiters, StringSplitOptions.None);
+        return ProcessParts(parts);
+    }
+
+    /// <summary>
+    /// Procesa números cuando el delimitador es un string (multi-char).
+    /// </summary>
+    private int AddWithDelimiterString(string input, string delimiter)
+    {
+        if (string.IsNullOrEmpty(input)) return 0;
+
+        var parts = input.Split(new[] { delimiter }, StringSplitOptions.None);
+        return ProcessParts(parts);
+    }
+
+    /// <summary>
+    /// Procesa un array de partes: suma válidos, valida negativos, respeta límite superior.
+    /// </summary>
+    private int ProcessParts(string[] parts)
+    {
         int sum = 0;
         var negatives = new List<int>();
 

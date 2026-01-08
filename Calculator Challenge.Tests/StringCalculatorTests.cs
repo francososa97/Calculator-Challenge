@@ -193,5 +193,30 @@ public class StringCalculatorTests
     }
 
     #endregion
+
+    #region Step 7 - Custom multi-char delimiter
+
+    [Fact]
+    public void Add_CustomMultiCharDelimiter_ReturnsSum()
+    {
+        var result = _calculator.Add("//[***]\n11***22***33");
+        Assert.Equal(66, result);
+    }
+
+    [Fact]
+    public void Add_CustomMultiCharDelimiter_WithInvalid_TreatsInvalidAsZero()
+    {
+        var result = _calculator.Add("//[abc]\n1abcxabc2");
+        Assert.Equal(3, result);
+    }
+
+    [Fact]
+    public void Add_CustomMultiCharDelimiter_RespectsGreaterThan1000Rule()
+    {
+        var result = _calculator.Add("//[***]\n1001***2");
+        Assert.Equal(2, result);
+    }
+
+    #endregion
 }
 

@@ -162,5 +162,36 @@ public class StringCalculatorTests
     }
 
     #endregion
+
+    #region Step 6 - Custom single-char delimiter
+
+    [Fact]
+    public void Add_CustomSingleCharDelimiter_ReturnsSum()
+    {
+        var result = _calculator.Add("//#\n2#5");
+        Assert.Equal(7, result);
+    }
+
+    [Fact]
+    public void Add_CustomSingleCharDelimiter_WithInvalid_TreatsInvalidAsZero()
+    {
+        var result = _calculator.Add("//;\n4;abc;6");
+        Assert.Equal(10, result);
+    }
+
+    [Fact]
+    public void Add_CustomSingleCharDelimiter_RespectsGreaterThan1000Rule()
+    {
+        var result = _calculator.Add("//@\n1001@2");
+        Assert.Equal(2, result);
+    }
+
+    [Fact]
+    public void Add_CustomSingleCharDelimiter_WithNegative_ThrowsWhenDisallowed()
+    {
+        Assert.Throws<ArgumentException>(() => _calculator.Add("//!\n1!-2!3"));
+    }
+
+    #endregion
 }
 

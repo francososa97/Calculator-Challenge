@@ -14,17 +14,33 @@ public class StringCalculator : IStringCalculator
     private readonly List<string> _baseDelimiters = new() { ",", "\n" };
 
     /// <summary>
-    /// Step 5: Soporte para coma y salto de línea como delimitadores.
-    /// Entradas inválidas o faltantes se tratan como 0.
-    /// Números negativos no permitidos (se listan todos en la excepción) salvo que se habiliten.
-    /// Números mayores al umbral (1000 por defecto) se ignoran.
+    /// Step 6: Soporte para delimitador custom de un carácter: //x\n
+    /// Ejemplo: //#\n2#5 => 7
     /// </summary>
     public int Add(string input)
     {
         if (string.IsNullOrEmpty(input)) return 0;
 
-        // Usar coma y \n como delimitadores
-        var parts = input.Split(new[] { ',', '\n' }, StringSplitOptions.None);
+        // Detectar delimitador custom //x\n
+        char[] delimiters = { ',', '\n' };
+        
+        if (input.StartsWith("//"))
+        {
+            int newlinePos = input.IndexOf('\n');
+            if (newlinePos > 2)
+            {
+                // El delimitador es un carácter entre // y \n
+                string customDelim = input.Substring(2, newlinePos - 2);
+                // Si es un carácter, usarlo como delimitador
+                if (customDelim.Length == 1)
+                {
+                    delimiters = new[] { customDelim[0] };
+                    input = input.Substring(newlinePos + 1);
+                }
+            }
+        }
+
+        var parts = input.Split(delimiters, StringSplitOptions.None);
         int sum = 0;
         var negatives = new List<int>();
 
@@ -41,9 +57,7 @@ public class StringCalculator : IStringCalculator
                 {
                     sum += num;
                 }
-                // Si num > _upperBound, se ignora (suma no cambia)
             }
-            // Si no es número válido o está vacío, se considera 0
         }
 
         if (negatives.Count > 0)

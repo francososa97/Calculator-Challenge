@@ -79,11 +79,36 @@ public class StringCalculatorTests
         Assert.Equal(5, result);
     }
 
+    #endregion
+
+    #region Step 2 - Unlimited numbers
+
     [Fact]
-    public void Add_MoreThanTwoNumbers_UsesOnlyFirst()
+    public void Add_ThreeNumbers_ReturnsSum()
+    {
+        var result = _calculator.Add("1,2,3");
+        Assert.Equal(6, result);
+    }
+
+    [Fact]
+    public void Add_ManyNumbers_ReturnsSum()
+    {
+        var result = _calculator.Add("1,2,3,4,5,6,7,8,9,10,11,12");
+        Assert.Equal(78, result);
+    }
+
+    [Fact]
+    public void Add_ManyNumbersWithMissing_HandlesAsZero()
+    {
+        var result = _calculator.Add("1,,3,4,");
+        Assert.Equal(8, result); // 1 + 0 + 3 + 4 + 0
+    }
+
+    [Fact]
+    public void Add_MoreThanTwoNumbers_SumsAll()
     {
         var result = _calculator.Add("1,2,3,4,5");
-        Assert.Equal(3, result); // Solo suma los primeros 2: 1+2
+        Assert.Equal(15, result);
     }
 
     #endregion

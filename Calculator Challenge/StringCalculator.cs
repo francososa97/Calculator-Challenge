@@ -9,13 +9,14 @@ namespace Calculator_Challenge;
 /// </summary>
 public class StringCalculator : IStringCalculator
 {
-    private bool _allowNegatives = true;
+    private bool _allowNegatives = false;
     private int _upperBound = 1000;
     private readonly List<string> _baseDelimiters = new() { ",", "\n" };
 
     /// <summary>
-    /// Step 3: Soporte para coma y salto de línea como delimitadores.
+    /// Step 4: Soporte para coma y salto de línea como delimitadores.
     /// Entradas inválidas o faltantes se tratan como 0.
+    /// Números negativos no permitidos (se listan todos en la excepción) salvo que se habiliten.
     /// </summary>
     public int Add(string input)
     {
@@ -24,15 +25,29 @@ public class StringCalculator : IStringCalculator
         // Usar coma y \n como delimitadores
         var parts = input.Split(new[] { ',', '\n' }, StringSplitOptions.None);
         int sum = 0;
+        var negatives = new List<int>();
 
         foreach (var part in parts)
         {
             var trimmed = part.Trim();
             if (int.TryParse(trimmed, out var num))
             {
-                sum += num;
+                if (num < 0 && !_allowNegatives)
+                {
+                    negatives.Add(num);
+                }
+                else
+                {
+                    sum += num;
+                }
             }
             // Si no es número válido o está vacío, se considera 0
+        }
+
+        if (negatives.Count > 0)
+        {
+            var list = string.Join(", ", negatives);
+            throw new ArgumentException($"Negativos no permitidos: {list}");
         }
 
         return sum;

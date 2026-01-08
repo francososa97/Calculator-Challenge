@@ -31,13 +31,6 @@ public class StringCalculatorTests
     }
 
     [Fact]
-    public void Add_TwoNumbersIncludingNegative_ReturnsSum()
-    {
-        var result = _calculator.Add("4,-3");
-        Assert.Equal(1, result);
-    }
-
-    [Fact]
     public void Add_MissingSecondNumber_TreatsAsZero()
     {
         var result = _calculator.Add("2,");
@@ -134,6 +127,33 @@ public class StringCalculatorTests
     {
         var result = _calculator.Add("5\n10,15\n20");
         Assert.Equal(50, result);
+    }
+
+    #endregion
+
+    #region Step 4 - Reject negatives
+
+    [Fact]
+    public void Add_WithNegativeNumbers_ThrowsExceptionWithAllNegatives()
+    {
+        var ex = Assert.Throws<ArgumentException>(() => _calculator.Add("1,-2,3,-5"));
+        Assert.Contains("-2", ex.Message);
+        Assert.Contains("-5", ex.Message);
+    }
+
+    [Fact]
+    public void Add_WithSingleNegative_ThrowsException()
+    {
+        var ex = Assert.Throws<ArgumentException>(() => _calculator.Add("5,-3,10"));
+        Assert.Contains("-3", ex.Message);
+    }
+
+    [Fact]
+    public void Add_WithNegativesAllowed_ReturnsSum()
+    {
+        _calculator.SetAllowNegatives(true);
+        var result = _calculator.Add("5,-3,10");
+        Assert.Equal(12, result);
     }
 
     #endregion

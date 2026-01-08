@@ -244,5 +244,33 @@ public class StringCalculatorTests
     }
 
     #endregion
+
+    #region Stretch - Formula details
+
+    [Fact]
+    public void AddWithDetails_FormulaExample_ReturnsExpectedFormula()
+    {
+        var (sum, formula) = _calculator.AddWithDetails("2,,4,rrrr,1001,6");
+        Assert.Equal(12, sum);
+        Assert.Equal("2+0+4+0+0+6 = 12", formula);
+    }
+
+    [Fact]
+    public void AddWithDetails_CustomDelimiter_ProducesCorrectFormula()
+    {
+        var (sum, formula) = _calculator.AddWithDetails("//[***]\n1***x***2***1001***3");
+        Assert.Equal(6, sum);
+        Assert.Equal("1+0+2+0+3 = 6", formula);
+    }
+
+    [Fact]
+    public void AddWithDetails_EmptyString_ReturnsZeroFormula()
+    {
+        var (sum, formula) = _calculator.AddWithDetails("");
+        Assert.Equal(0, sum);
+        Assert.Equal("0 = 0", formula);
+    }
+
+    #endregion
 }
 

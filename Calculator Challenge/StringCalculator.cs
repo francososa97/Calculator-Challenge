@@ -148,7 +148,174 @@ public class StringCalculator : IStringCalculator
     public (int Sum, string Formula) AddWithDetails(string input)
     {
         if (string.IsNullOrEmpty(input)) return (0, "0 = 0");
-        return (0, "0 = 0");
+
+        char[] delimiters = { ',', '\n' };
+        var terms = new List<int>();
+        
+        if (input.StartsWith("//"))
+        {
+            int newlinePos = input.IndexOf('\n');
+            if (newlinePos > 2)
+            {
+                string delimDef = input.Substring(2, newlinePos - 2);
+                
+                // Caso: múltiples delimitadores
+                if (delimDef.StartsWith("["))
+                {
+                    var customDelims = new List<string>();
+                    int pos = 0;
+                    
+                    while (pos < delimDef.Length)
+                    {
+                        if (delimDef[pos] == '[')
+                        {
+                            int closePos = delimDef.IndexOf(']', pos);
+                            if (closePos > pos)
+                            {
+                                string delim = delimDef.Substring(pos + 1, closePos - pos - 1);
+                                if (!string.IsNullOrEmpty(delim))
+                                    customDelims.Add(delim);
+                                pos = closePos + 1;
+                            }
+                            else
+                                break;
+                        }
+                        else
+                            pos++;
+                    }
+                    
+                    if (customDelims.Count > 0)
+                    {
+                        input = input.Substring(newlinePos + 1);
+                        return AddWithDetailsMultipleDelimiters(input, customDelims);
+                    }
+                }
+                // Caso: single-char
+                else if (delimDef.Length == 1)
+                {
+                    delimiters = new[] { delimDef[0] };
+                    input = input.Substring(newlinePos + 1);
+                }
+            }
+        }
+
+        var parts = input.Split(delimiters, StringSplitOptions.None);
+        
+        // Primero, procesar cada parte para obtener los términos
+        foreach (var part in parts)
+        {
+            var trimmed = part.Trim();
+            if (int.TryParse(trimmed, out var num))
+            {
+                // Es un número válido
+                if (num < 0 && !_allowNegatives)
+                {
+                    // Será validado después (no incluimos en términos)
+                    continue;
+                }
+                
+                if (num > _upperBound)
+                {
+                    terms.Add(0); // Números > límite se muestran como 0
+                }
+                else
+                {
+                    terms.Add(num);
+                }
+            }
+            else
+            {
+                // Inválido o vacío => 0
+                terms.Add(0);
+            }
+        }
+
+        // Validar negativos
+        var negatives = new List<int>();
+        foreach (var part in parts)
+        {
+            var trimmed = part.Trim();
+            if (int.TryParse(trimmed, out var num) && num < 0 && !_allowNegatives)
+            {
+                negatives.Add(num);
+            }
+        }
+
+        if (negatives.Count > 0)
+        {
+            var list = string.Join(", ", negatives);
+            throw new ArgumentException($"Negativos no permitidos: {list}");
+        }
+
+        int sum = terms.Sum();
+        string formula = string.Join("+", terms) + " = " + sum;
+        return (sum, formula);
+    }
+
+    /// <summary>
+    /// AddWithDetails para múltiples delimitadores.
+    /// </summary>
+    private (int Sum, string Formula) AddWithDetailsMultipleDelimiters(string input, List<string> delimiters)
+    {
+        if (string.IsNullOrEmpty(input)) return (0, "0 = 0");
+
+        var sortedDelims = delimiters.OrderByDescending(d => d.Length).ToList();
+        string temp = input;
+        string separator = "\x00";
+        
+        foreach (var delim in sortedDelims)
+        {
+            temp = temp.Replace(delim, separator);
+        }
+
+        var parts = temp.Split(new[] { separator[0] }, StringSplitOptions.None);
+        var terms = new List<int>();
+
+        foreach (var part in parts)
+        {
+            var trimmed = part.Trim();
+            if (int.TryParse(trimmed, out var num))
+            {
+                if (num < 0 && !_allowNegatives)
+                {
+                    continue;
+                }
+                
+                if (num > _upperBound)
+                {
+                    terms.Add(0);
+                }
+                else
+                {
+                    terms.Add(num);
+                }
+            }
+            else
+            {
+                terms.Add(0);
+            }
+        }
+
+        // Validar negativos
+        var negatives = new List<int>();
+        foreach (var part in parts)
+        {
+            var trimmed = part.Trim();
+            if (int.TryParse(trimmed, out var num) && num < 0 && !_allowNegatives)
+            {
+                negatives.Add(num);
+            }
+        }
+
+        if (negatives.Count > 0)
+        {
+            var list = string.Join(", ", negatives);
+            throw new ArgumentException($"Negativos no permitidos: {list}");
+        }
+
+        int sum = terms.Sum();
+        string formula = string.Join("+", terms) + " = " + sum;
+        return (sum, formula);
     }
 
     // Configuración

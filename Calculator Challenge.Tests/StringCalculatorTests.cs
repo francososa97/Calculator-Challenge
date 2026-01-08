@@ -131,30 +131,36 @@ public class StringCalculatorTests
 
     #endregion
 
-    #region Step 4 - Reject negatives
+    #region Step 5 - Ignore numbers greater than 1000
 
     [Fact]
-    public void Add_WithNegativeNumbers_ThrowsExceptionWithAllNegatives()
+    public void Add_WithNumbersGreaterThan1000_IgnoresThem()
     {
-        var ex = Assert.Throws<ArgumentException>(() => _calculator.Add("1,-2,3,-5"));
-        Assert.Contains("-2", ex.Message);
-        Assert.Contains("-5", ex.Message);
+        var result = _calculator.Add("2,1001,6");
+        Assert.Equal(8, result); // 2 + 0 + 6
     }
 
     [Fact]
-    public void Add_WithSingleNegative_ThrowsException()
+    public void Add_With1000_IncludesIt()
     {
-        var ex = Assert.Throws<ArgumentException>(() => _calculator.Add("5,-3,10"));
-        Assert.Contains("-3", ex.Message);
+        var result = _calculator.Add("1000,5");
+        Assert.Equal(1005, result);
     }
 
     [Fact]
-    public void Add_WithNegativesAllowed_ReturnsSum()
+    public void Add_With1001_IgnoresIt()
     {
-        _calculator.SetAllowNegatives(true);
-        var result = _calculator.Add("5,-3,10");
-        Assert.Equal(12, result);
+        var result = _calculator.Add("1001,5");
+        Assert.Equal(5, result);
+    }
+
+    [Fact]
+    public void Add_MultipleNumbersGreaterThan1000()
+    {
+        var result = _calculator.Add("10,1001,2000,5");
+        Assert.Equal(15, result); // 10 + 0 + 0 + 5
     }
 
     #endregion
 }
+

@@ -14,9 +14,10 @@ public class StringCalculator : IStringCalculator
     private readonly List<string> _baseDelimiters = new() { ",", "\n" };
 
     /// <summary>
-    /// Step 4: Soporte para coma y salto de línea como delimitadores.
+    /// Step 5: Soporte para coma y salto de línea como delimitadores.
     /// Entradas inválidas o faltantes se tratan como 0.
     /// Números negativos no permitidos (se listan todos en la excepción) salvo que se habiliten.
+    /// Números mayores al umbral (1000 por defecto) se ignoran.
     /// </summary>
     public int Add(string input)
     {
@@ -36,10 +37,11 @@ public class StringCalculator : IStringCalculator
                 {
                     negatives.Add(num);
                 }
-                else
+                else if (num <= _upperBound)
                 {
                     sum += num;
                 }
+                // Si num > _upperBound, se ignora (suma no cambia)
             }
             // Si no es número válido o está vacío, se considera 0
         }
